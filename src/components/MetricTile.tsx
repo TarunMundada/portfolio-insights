@@ -31,16 +31,16 @@ export const MetricTile = ({
   };
 
   return (
-    <div className="flex flex-col gap-1 p-3 border border-border bg-card rounded">
-      <div className="flex items-center gap-1">
-        <span className="text-[11px] text-muted-foreground uppercase tracking-wide">
+    <div className="flex flex-col gap-1.5 p-3 border border-border bg-card rounded-lg hover:border-border-strong transition-colors">
+      <div className="flex items-center justify-between gap-1">
+        <span className="text-[10px] text-muted-foreground uppercase tracking-wide font-medium">
           {label}
         </span>
         {tooltip && (
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Info className="h-3 w-3 text-muted-foreground cursor-help" />
+                <Info className="h-3 w-3 text-muted-foreground cursor-help hover:text-foreground transition-colors" />
               </TooltipTrigger>
               <TooltipContent className="max-w-xs text-xs">
                 <p>{tooltip}</p>
@@ -49,11 +49,11 @@ export const MetricTile = ({
           </TooltipProvider>
         )}
       </div>
-      <div className={cn("text-xl font-semibold tabular-nums", getVariantStyles())}>
+      <div className={cn("text-2xl font-semibold tabular-nums leading-none", getVariantStyles())}>
         {value}
       </div>
       {subtext && (
-        <div className="text-[11px] text-muted-foreground">
+        <div className="text-[10px] text-muted-foreground leading-tight mt-0.5">
           {subtext}
         </div>
       )}

@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { DashboardCard } from "./DashboardCard";
-import { Button } from "@/components/ui/button";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { TrendingUp } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 // Mock data
 const generateMockData = () => {
@@ -44,46 +44,50 @@ export const PortfolioChart = () => {
     >
       <div className="space-y-3">
         {/* Chart Controls */}
-        <div className="flex items-center justify-between px-3 pt-3">
-          <div className="flex gap-2">
-            <Button
-              size="sm"
-              variant={viewMode === "absolute" ? "default" : "outline"}
+        <div className="flex items-center justify-between px-3 pt-3 flex-wrap gap-2">
+          <div className="inline-flex rounded-lg bg-muted p-0.5">
+            <button
               onClick={() => setViewMode("absolute")}
-              className="h-7 text-xs"
+              className={cn(
+                "px-3 py-1 text-xs font-medium rounded-md transition-all",
+                viewMode === "absolute" 
+                  ? "bg-background text-foreground shadow-sm" 
+                  : "text-muted-foreground hover:text-foreground"
+              )}
             >
               Absolute
-            </Button>
-            <Button
-              size="sm"
-              variant={viewMode === "normalized" ? "default" : "outline"}
+            </button>
+            <button
               onClick={() => setViewMode("normalized")}
-              className="h-7 text-xs"
+              className={cn(
+                "px-3 py-1 text-xs font-medium rounded-md transition-all",
+                viewMode === "normalized" 
+                  ? "bg-background text-foreground shadow-sm" 
+                  : "text-muted-foreground hover:text-foreground"
+              )}
             >
               Normalized
-            </Button>
+            </button>
           </div>
           
-          <Button
-            size="sm"
-            variant="outline"
+          <button
             onClick={() => setShowStacked(!showStacked)}
-            className="h-7 text-xs gap-1"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-border bg-background hover:bg-muted transition-colors"
           >
-            <TrendingUp className="h-3 w-3" />
+            <TrendingUp className="h-3.5 w-3.5" />
             {showStacked ? "Combined" : "Stacked"}
-          </Button>
+          </button>
         </div>
 
         {/* Chart */}
         <div className="h-80 px-3 pb-3">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={mockData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" strokeOpacity={0.5} />
               <XAxis 
                 dataKey="date" 
                 stroke="hsl(var(--muted-foreground))"
-                style={{ fontSize: '10px' }}
+                style={{ fontSize: '10px', fontWeight: 500 }}
                 tickFormatter={(value) => {
                   const date = new Date(value);
                   return date.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
@@ -91,7 +95,7 @@ export const PortfolioChart = () => {
               />
               <YAxis 
                 stroke="hsl(var(--muted-foreground))"
-                style={{ fontSize: '10px' }}
+                style={{ fontSize: '10px', fontWeight: 500 }}
                 tickFormatter={(value) => `₹${(value / 100000).toFixed(1)}L`}
               />
               <Tooltip 

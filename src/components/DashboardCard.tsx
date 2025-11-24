@@ -18,20 +18,20 @@ export const DashboardCard = ({
   contentClassName 
 }: DashboardCardProps) => {
   return (
-    <Card className={cn("border border-border bg-card", className)}>
-      <CardHeader className="px-3 py-2 border-b border-border">
+    <Card className={cn("border border-border bg-card rounded-lg shadow-sm hover:shadow-md transition-shadow", className)}>
+      <CardHeader className="px-3 py-2.5 border-b-2 border-border-strong bg-muted/20">
         <div className="flex items-center justify-between">
           <CardTitle className="text-sm font-semibold text-foreground">
             {title}
           </CardTitle>
           {timestamp && (
-            <span className="text-[11px] text-muted-foreground">
+            <span className="text-[10px] text-muted-foreground font-medium">
               As of {timestamp}
             </span>
           )}
         </div>
       </CardHeader>
-      <CardContent className={cn("p-3", contentClassName)}>
+      <CardContent className={cn("p-2.5", contentClassName)}>
         {children}
       </CardContent>
     </Card>
