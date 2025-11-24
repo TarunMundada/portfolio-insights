@@ -16,9 +16,9 @@ const mockWeights = [
 export const AssetAllocation = () => {
   return (
     <DashboardCard title="Asset Allocation" timestamp="2024-12-31">
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {/* Pie Chart */}
-        <div className="h-48">
+        <div className="h-52">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie

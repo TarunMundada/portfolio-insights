@@ -11,26 +11,26 @@ const mockComparisons = [
 export const ComparisonBand = () => {
   return (
     <DashboardCard title="Benchmark Comparison" timestamp="2024-12-31">
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 lg:gap-4">
         {mockComparisons.map((item, idx) => (
-          <div key={idx} className="space-y-2">
-            <div className="text-xs font-medium text-foreground">{item.name}</div>
+          <div key={idx} className="space-y-2 p-2 rounded-lg border border-border bg-background hover:border-border-strong transition-colors">
+            <div className="text-xs font-semibold text-foreground">{item.name}</div>
             
-            <div className="h-16">
+            <div className="h-14">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={item.data.map((val, i) => ({ value: val }))}>
                   <Line 
                     type="monotone" 
                     dataKey="value" 
                     stroke={idx === 0 ? "hsl(var(--chart-primary))" : "hsl(var(--chart-neutral))"} 
-                    strokeWidth={1.5}
+                    strokeWidth={2}
                     dot={false}
                   />
                 </LineChart>
               </ResponsiveContainer>
             </div>
             
-            <div className={`text-xs font-semibold tabular-nums ${
+            <div className={`text-sm font-bold tabular-nums ${
               item.change.startsWith('+') ? 'text-success' : 'text-destructive'
             }`}>
               {item.change}
