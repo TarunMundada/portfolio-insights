@@ -3,43 +3,44 @@ import { DashboardCard } from "./DashboardCard";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { TrendingUp } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { PortfolioDaily } from "@/services/api";
 
-// Mock data
-const generateMockData = () => {
-  const data = [];
-  const startDate = new Date("2020-01-01");
-  const endDate = new Date("2024-12-31");
-  
-  let portfolioValue = 50000;
-  let invested = 50000;
-  
-  for (let d = new Date(startDate); d <= endDate; d.setMonth(d.getMonth() + 1)) {
-    invested += 15000;
-    portfolioValue = invested * (1 + Math.random() * 0.5);
-    
-    data.push({
-      date: d.toISOString().split('T')[0],
-      portfolioValue: Math.round(portfolioValue),
-      invested: invested,
-      asset1: Math.round(portfolioValue * 0.4),
-      asset2: Math.round(portfolioValue * 0.35),
-      asset3: Math.round(portfolioValue * 0.25),
-    });
-  }
-  
-  return data;
-};
+interface PortfolioChartProps {
+  data: PortfolioDaily[] | null;
+  timestamp?: string;
+}
 
-const mockData = generateMockData();
-
-export const PortfolioChart = () => {
+export const PortfolioChart = ({ data, timestamp }: PortfolioChartProps) => {
   const [viewMode, setViewMode] = useState<"absolute" | "normalized">("absolute");
   const [showStacked, setShowStacked] = useState(false);
+
+  if (!data || data.length === 0) {
+    return (
+      <DashboardCard 
+        title="Portfolio Value" 
+        timestamp={timestamp}
+        contentClassName="p-0"
+      >
+        <div className="h-80 flex items-center justify-center text-muted-foreground">
+          <div className="text-center">
+            <p className="text-sm">No data available</p>
+            <p className="text-xs mt-1">Run a backtest to see portfolio value over time</p>
+          </div>
+        </div>
+      </DashboardCard>
+    );
+  }
+
+  const chartData = data.map(d => ({
+    date: d.date,
+    portfolioValue: d.portfolio_value,
+    invested: d.cumulative_invested,
+  }));
 
   return (
     <DashboardCard 
       title="Portfolio Value" 
-      timestamp="2024-12-31"
+      timestamp={timestamp || new Date().toISOString().split('T')[0]}
       contentClassName="p-0"
     >
       <div className="space-y-3">
@@ -82,7 +83,7 @@ export const PortfolioChart = () => {
         {/* Chart */}
         <div className="h-80 px-3 pb-3">
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={mockData}>
+            <LineChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" strokeOpacity={0.5} />
               <XAxis 
                 dataKey="date" 
@@ -110,43 +111,14 @@ export const PortfolioChart = () => {
               <Legend 
                 wrapperStyle={{ fontSize: '11px' }}
               />
-              {showStacked ? (
-                <>
-                  <Line 
-                    type="monotone" 
-                    dataKey="asset1" 
-                    stroke="hsl(var(--chart-primary))" 
-                    strokeWidth={1.5}
-                    dot={false}
-                    name="Asset 1"
-                  />
-                  <Line 
-                    type="monotone" 
-                    dataKey="asset2" 
-                    stroke="hsl(var(--chart-highlight))" 
-                    strokeWidth={1.5}
-                    dot={false}
-                    name="Asset 2"
-                  />
-                  <Line 
-                    type="monotone" 
-                    dataKey="asset3" 
-                    stroke="hsl(var(--chart-neutral))" 
-                    strokeWidth={1.5}
-                    dot={false}
-                    name="Asset 3"
-                  />
-                </>
-              ) : (
-                <Line 
-                  type="monotone" 
-                  dataKey="portfolioValue" 
-                  stroke="hsl(var(--chart-primary))" 
-                  strokeWidth={2}
-                  dot={false}
-                  name="Portfolio"
-                />
-              )}
+              <Line 
+                type="monotone" 
+                dataKey="portfolioValue" 
+                stroke="hsl(var(--chart-primary))" 
+                strokeWidth={2}
+                dot={false}
+                name="Portfolio"
+              />
               <Line 
                 type="monotone" 
                 dataKey="invested" 

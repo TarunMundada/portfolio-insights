@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { DashboardCard } from "./DashboardCard";
+import { FundSearchInput } from "./FundSearchInput";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Plus, Play, Download, X, ChevronDown, ChevronUp } from "lucide-react";
+import { Plus, Play, Download, X, ChevronDown, ChevronUp, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   Collapsible,
@@ -14,16 +15,25 @@ import {
 interface AssetInput {
   id: string;
   schemeName: string;
-  schemeCode: string;
+  schemeCode: number;
   monthlyAmount: string;
   sipDay: string;
   initialAmount: string;
   isOpen: boolean;
 }
 
-export const PortfolioBuilder = () => {
+interface PortfolioBuilderProps {
+  onRunBacktest: (data: {
+    assets: AssetInput[];
+    startDate: string;
+    endDate: string;
+  }) => void;
+  isLoading?: boolean;
+}
+
+export const PortfolioBuilder = ({ onRunBacktest, isLoading = false }: PortfolioBuilderProps) => {
   const [assets, setAssets] = useState<AssetInput[]>([
-    { id: "1", schemeName: "", schemeCode: "", monthlyAmount: "15000", sipDay: "22", initialAmount: "50000", isOpen: true }
+    { id: "1", schemeName: "", schemeCode: 0, monthlyAmount: "15000", sipDay: "22", initialAmount: "50000", isOpen: true }
   ]);
   const [startDate, setStartDate] = useState("2020-01-01");
   const [endDate, setEndDate] = useState("2024-12-31");
@@ -31,8 +41,16 @@ export const PortfolioBuilder = () => {
   const addAsset = () => {
     setAssets([
       ...assets,
-      { id: Date.now().toString(), schemeName: "", schemeCode: "", monthlyAmount: "", sipDay: "1", initialAmount: "", isOpen: true }
+      { id: Date.now().toString(), schemeName: "", schemeCode: 0, monthlyAmount: "", sipDay: "1", initialAmount: "", isOpen: true }
     ]);
+  };
+
+  const handleRunBacktest = () => {
+    onRunBacktest({
+      assets,
+      startDate,
+      endDate,
+    });
   };
 
   const removeAsset = (id: string) => {
@@ -109,19 +127,15 @@ export const PortfolioBuilder = () => {
 
                   <CollapsibleContent>
                     <div className="p-2.5 space-y-2.5">
-                      <div>
-                        <Label className="text-[10px]">Fund Name</Label>
-                        <Input 
-                          placeholder="Search fund name or code..."
-                          className="mt-1 h-7 text-xs"
-                          value={asset.schemeName}
-                          onChange={(e) => {
-                            setAssets(assets.map(a => 
-                              a.id === asset.id ? { ...a, schemeName: e.target.value } : a
-                            ));
-                          }}
-                        />
-                      </div>
+                      <FundSearchInput
+                        value={asset.schemeName}
+                        schemeCode={asset.schemeCode.toString()}
+                        onSelect={(name, code) => {
+                          setAssets(assets.map(a =>
+                            a.id === asset.id ? { ...a, schemeName: name, schemeCode: code } : a
+                          ));
+                        }}
+                      />
                       
                       <div className="grid grid-cols-2 gap-2">
                         <div>
@@ -187,11 +201,24 @@ export const PortfolioBuilder = () => {
 
         {/* Action Buttons */}
         <div className="flex flex-col gap-2 pt-3 border-t border-border">
-          <Button className="w-full h-9 text-xs gap-2 font-semibold">
-            <Play className="h-3.5 w-3.5" />
-            Run Backtest
+          <Button 
+            className="w-full h-9 text-xs gap-2 font-semibold"
+            onClick={handleRunBacktest}
+            disabled={isLoading || assets.some(a => !a.schemeCode)}
+          >
+            {isLoading ? (
+              <>
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                Running...
+              </>
+            ) : (
+              <>
+                <Play className="h-3.5 w-3.5" />
+                Run Backtest
+              </>
+            )}
           </Button>
-          <Button variant="outline" className="w-full h-8 text-xs gap-2">
+          <Button variant="outline" className="w-full h-8 text-xs gap-2" disabled={isLoading}>
             <Download className="h-3.5 w-3.5" />
             Export CSV
           </Button>
