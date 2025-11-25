@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { PortfolioBuilder } from "@/components/PortfolioBuilder";
 import { SummaryMetrics } from "@/components/SummaryMetrics";
 import { PortfolioChart } from "@/components/PortfolioChart";
@@ -8,8 +9,39 @@ import { AssetAllocation } from "@/components/AssetAllocation";
 import { DashboardFooter } from "@/components/DashboardFooter";
 import { Briefcase, Play, Download, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useBacktest } from "@/hooks/useBacktest";
+import { BacktestResponse } from "@/services/api";
 
 const Index = () => {
+  const [backtestData, setBacktestData] = useState<BacktestResponse | null>(null);
+  const { mutate: runBacktest, isPending } = useBacktest();
+
+  const handleRunBacktest = (data: {
+    assets: any[];
+    startDate: string;
+    endDate: string;
+  }) => {
+    const request = {
+      assets: data.assets
+        .filter(a => a.schemeCode > 0)
+        .map(a => ({
+          id: a.id,
+          scheme_code: a.schemeCode,
+          monthly_amount: parseFloat(a.monthlyAmount) || 0,
+          sip_day: parseInt(a.sipDay) || 1,
+          initial_amount: parseFloat(a.initialAmount) || 0,
+        })),
+      start_date: data.startDate,
+      end_date: data.endDate,
+    };
+
+    runBacktest(request, {
+      onSuccess: (response) => {
+        setBacktestData(response);
+      },
+    });
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Top Navigation */}
@@ -77,13 +109,20 @@ const Index = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 lg:gap-3.5">
           {/* Left Column - Controls/Filters */}
           <aside className="lg:col-span-3 order-2 lg:order-1">
-            <PortfolioBuilder />
+            <PortfolioBuilder onRunBacktest={handleRunBacktest} isLoading={isPending} />
           </aside>
 
           {/* Middle Column - Charts & Visuals */}
           <section className="lg:col-span-6 space-y-3 lg:space-y-3.5 order-1 lg:order-2">
-            <SummaryMetrics />
-            <PortfolioChart />
+            <SummaryMetrics 
+              metrics={backtestData?.metrics || null}
+              startDate={backtestData?.portfolio_daily?.[0]?.date}
+              endDate={backtestData?.portfolio_daily?.[backtestData.portfolio_daily.length - 1]?.date}
+            />
+            <PortfolioChart 
+              data={backtestData?.portfolio_daily || null}
+              timestamp={backtestData?.portfolio_daily?.[backtestData.portfolio_daily.length - 1]?.date}
+            />
             <ComparisonBand />
             <AssetAllocation />
             <DashboardFooter />
@@ -92,7 +131,10 @@ const Index = () => {
           {/* Right Column - Metrics & Tables */}
           <aside className="lg:col-span-3 space-y-3 lg:space-y-3.5 order-3">
             <ReturnsTable />
-            <TransactionsLog />
+            <TransactionsLog 
+              transactions={backtestData?.transactions || null}
+              timestamp={backtestData?.portfolio_daily?.[backtestData.portfolio_daily.length - 1]?.date}
+            />
           </aside>
         </div>
       </main>
